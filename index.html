@@ -1,0 +1,215 @@
+<!-- FunnFit 72 · PWA · index unico (carga funnfit_data.js + funnfit_app.js + funnfit_styles.css) -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f9f8f6">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>FunnFit 72</title>
+<script src="chart.umd.js"></script>
+<link rel="stylesheet" href="funnfit_styles.css">
+</head>
+<body>
+
+
+<div id="splash" onclick="splashTap()">
+  <div class="splash-logo" style="display:flex;flex-direction:column;align-items:center;justify-content:center;"><span class="splash-logo-num">72</span><span class="splash-logo-ff">FF</span></div>
+  <div class="splash-name">72FunnFit</div>
+  <div class="splash-sub">Tap para continuar</div>
+</div>
+<div id="setup-screen" class="setup-screen hidden">
+  <svg class="logo-svg-lg" viewBox="0 0 84 84" xmlns="http://www.w3.org/2000/svg"><circle cx="42" cy="42" r="42" fill="#111"/><text x="42" y="35" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="24" font-weight="900" fill="#e8661a">72</text><text x="42" y="60" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="24" font-weight="900" fill="#ffffff">FF</text></svg>
+  <div class="setup-title">Bienvenido a 72FunnFit</div>
+  <div class="setup-sub">Completá tu perfil para comenzar.<br>Podés modificarlo desde el tab Atleta.</div>
+  <div class="setup-card">
+    <div class="setup-field"><div class="setup-lbl">Tu nombre</div><input class="fi" id="setup-name" type="text" placeholder="Nombre del atleta" autocomplete="off"></div>
+    <div class="setup-field"><div class="setup-lbl">Fecha de inicio del programa</div><input class="fi" id="setup-start" type="text" inputmode="numeric" placeholder="DD-MM-AAAA" maxlength="10" oninput="autoFmtDate(this,'setup-start-hint','start')"><span class="date-hint" id="setup-start-hint"></span></div>
+    <div class="setup-field"><div class="setup-lbl">Fecha de nacimiento</div><input class="fi" id="setup-dob" type="text" inputmode="numeric" placeholder="DD-MM-AAAA" maxlength="10" oninput="autoFmtDate(this,'setup-dob-hint','dob')"><span class="date-hint" id="setup-dob-hint"></span></div>
+    <div class="setup-field"><div class="setup-lbl">Sexo</div><select class="fi" id="setup-sex"><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+    <div class="setup-field"><div class="setup-lbl">Altura (cm)</div><input class="fi" id="setup-height" type="number" placeholder="ej: 175" min="100" max="220"></div>
+    <button class="fb" style="width:100%;margin-top:6px;" onclick="saveSetup()">Comenzar →</button>
+  </div>
+</div>
+<div id="hdr">
+  <svg class="logo-svg" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" onclick="showTab('athlete')"><circle cx="19" cy="19" r="19" fill="#111"/><text x="19" y="15" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="11" font-weight="900" fill="#e8661a">72</text><text x="19" y="27" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="11" font-weight="900" fill="#ffffff">FF</text></svg>
+  <div class="hdr-center">
+    <h1>72<span>FunnFit</span> <small>V07</small></h1>
+    <div class="hdr-athlete-name" id="hdr-name" onclick="showTab('athlete')"></div>
+  </div>
+  <div id="hdr-photo" onclick="showTab('athlete')"></div>
+</div>
+<main>
+<div id="tab-wod" class="tab">
+  <div id="wnav">
+    <button class="wnav-btn" id="wprev" onclick="changeWeek(-1)">‹</button>
+    <div id="wnav-info"><div id="wnav-num">S1</div><div id="wnav-dates"></div><button class="today-btn" onclick="goToday()">HOY</button></div>
+    <button class="wnav-btn" id="wnext" onclick="changeWeek(1)">›</button>
+  </div>
+  <div id="wbanner"><div id="wbanner-top"></div><div id="wbanner-mc"></div><div class="chips" id="wbanner-chips"></div></div>
+  <div id="dtabs"></div>
+  <div id="wod"></div>
+</div>
+<div id="tab-cal" class="tab">
+  <div class="tab-pad">
+    <div class="sec-title">Calorías — <span id="cal-date-lbl" style="color:var(--t2);font-size:14px;font-weight:400"></span></div>
+    <div class="form-row"><input class="fi" id="cal-event" placeholder="Evento (Almuerzo, WOD…)" type="text"><input class="fi fi-sm" id="cal-kcal" placeholder="kcal" type="number"><button class="fb" onclick="addCal()">+</button></div>
+    <div id="cal-list"></div>
+    <div class="total-bar"><div><div class="tot-lbl">Total hoy</div><div id="cal-daily-total" class="tot-val">0</div></div><div style="text-align:right"><div class="tot-lbl">Esta semana</div><div id="cal-week-total" class="tot-val-b">0</div></div></div>
+    <div class="chart-title">Últimos 7 días</div>
+    <div class="chart-wrap"><canvas id="cal-chart"></canvas></div>
+  </div>
+</div>
+<div id="tab-steps" class="tab">
+  <div class="tab-pad">
+    <div class="sec-title">Pasos — <span id="steps-date-lbl" style="color:var(--t2);font-size:14px;font-weight:400"></span></div>
+    <input class="big-inp" id="steps-inp" type="number" placeholder="Ingresá tus pasos de hoy" min="0">
+    <button class="fb" style="width:100%;margin-bottom:14px;" onclick="saveSteps()">✓ Guardar pasos</button>
+    <div class="total-bar"><div><div class="tot-lbl">Hoy</div><div id="steps-today" class="tot-val" style="color:var(--blue)">0</div></div><div style="text-align:right"><div class="tot-lbl">Esta semana</div><div id="steps-week" class="tot-val-b">0</div></div></div>
+    <div class="chart-title">Últimos 7 días</div>
+    <div class="chart-wrap"><canvas id="steps-chart"></canvas></div>
+    <div class="divider"></div>
+    <div class="sec-sub">Historial reciente</div>
+    <div id="steps-hist"></div>
+  </div>
+</div>
+<div id="tab-stats" class="tab">
+  <div class="tab-pad">
+    <div class="sec-title">Resumen</div>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em;">Días completados esta semana</div>
+    <div class="week-prog" id="week-prog"></div>
+    <div class="divider"></div>
+    <div class="sec-sub">Calorías — 4 semanas</div>
+    <div class="chart-wrap"><canvas id="stats-cal-chart"></canvas></div>
+    <div class="sec-sub">Pasos — 4 semanas</div>
+    <div class="chart-wrap"><canvas id="stats-steps-chart"></canvas></div>
+    <div class="divider"></div>
+    <div class="sec-sub">Evolución corporal</div>
+    <div id="stats-body-summary" class="metric-grid"></div>
+    <div class="sec-sub">Peso (kg)</div>
+    <div class="chart-wrap"><canvas id="stats-weight-chart"></canvas></div>
+    <div class="sec-sub">% Grasa corporal</div>
+    <div class="chart-wrap"><canvas id="stats-fat-chart"></canvas></div>
+  </div>
+</div>
+<div id="tab-athlete" class="tab">
+  <div class="tab-pad">
+    <div class="sec-title">Perfil del atleta</div>
+    <div class="profile-photo-wrap">
+      <div class="profile-photo" id="profile-photo-display" onclick="document.getElementById('athlete-photo-inp').click()"></div>
+      <input type="file" id="athlete-photo-inp" accept="image/*" style="display:none" onchange="loadAthletePhoto(this)">
+      <div style="font-size:12px;color:var(--t2);">Tap para cambiar foto</div>
+    </div>
+    <div class="pr-form">
+      <div class="pr-form-title">Datos personales</div>
+      <div class="setup-field"><div class="setup-lbl">Nombre</div><input class="fi" id="ath-name" type="text" placeholder="Tu nombre"></div>
+      <div class="form-row">
+        <div style="flex:1"><div class="setup-lbl" style="font-size:11px;color:var(--t2);margin-bottom:5px;">FECHA DE NACIMIENTO</div><input class="fi" id="ath-dob" type="text" inputmode="numeric" placeholder="DD-MM-AAAA" maxlength="10" oninput="autoFmtDate(this,'ath-dob-hint','dob')"><span class="date-hint" id="ath-dob-hint"></span></div>
+        <div style="flex:1"><div class="setup-lbl" style="font-size:11px;color:var(--t2);margin-bottom:5px;">SEXO</div><select class="fi" id="ath-sex"><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+      </div>
+      <div class="form-row">
+        <div style="flex:1"><div class="setup-lbl" style="font-size:11px;color:var(--t2);margin-bottom:5px;">ALTURA (cm)</div><input class="fi" id="ath-height" type="number" placeholder="175"></div>
+        <div style="flex:1"><div class="setup-lbl" style="font-size:11px;color:var(--t2);margin-bottom:5px;">INICIO DEL PROGRAMA</div><input class="fi" id="ath-start" type="text" inputmode="numeric" placeholder="DD-MM-AAAA" maxlength="10" oninput="autoFmtDate(this,'ath-start-hint','start')"><span class="date-hint" id="ath-start-hint"></span></div>
+      </div>
+      <button class="fb" style="width:100%" onclick="saveProfile()">Guardar perfil</button>
+    </div>
+    <div class="pr-form">
+      <div class="pr-form-title">Registrar métricas corporales</div>
+      <div id="metrics-form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;"></div>
+      <button class="fb" style="width:100%" onclick="saveMetrics()">Guardar medición</button>
+    </div>
+    <div class="sec-sub">Últimas mediciones</div>
+    <div id="metrics-history"></div>
+  </div>
+</div>
+<div id="tab-pr" class="tab">
+  <div class="tab-pad">
+    <div id="eval-note"></div>
+    <div class="pr-form">
+      <div class="pr-form-title">Registrar 1RM directo</div>
+      <div class="form-row"><select class="fi" id="pr-move"><option value="">Movimiento...</option><option>Back Squat</option><option>Front Squat</option><option>Deadlift</option><option>Clean &amp; Jerk</option><option>Snatch</option><option>Strict Press</option><option>Push Jerk</option></select><input class="fi fi-sm" id="pr-kg" type="number" placeholder="kg"><button class="fb" onclick="savePR()">✓</button></div>
+    </div>
+    <div class="pr-form">
+      <div class="pr-form-title">Calcular e1RM desde reps (fórmula Epley)</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:10px;">Si hiciste varias reps con peso submáximo, te calculo el 1RM estimado</div>
+      <div class="form-row"><select class="fi" id="e1rm-move"><option value="">Movimiento...</option><option>Back Squat</option><option>Front Squat</option><option>Deadlift</option><option>Clean &amp; Jerk</option><option>Snatch</option><option>Strict Press</option><option>Push Jerk</option></select></div>
+      <div class="form-row"><input class="fi fi-sm" id="e1rm-kg" type="number" placeholder="kg"><input class="fi fi-sm" id="e1rm-reps" type="number" placeholder="reps"><button class="fb" onclick="savePRfromReps()">Calcular</button></div>
+    </div>
+    <div id="pr-list"></div>
+  </div>
+</div>
+</main>
+<nav id="bnav">
+  <button class="nb" onclick="showTab('athlete')" id="nb-athlete"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>Atleta</button>
+  <button class="nb" onclick="showTab('wod')" id="nb-wod"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0z"/></svg>WOD</button>
+  <button class="nb" onclick="showTab('cal')" id="nb-cal"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z"/></svg>Calorías</button>
+  <button class="nb" onclick="showTab('steps')" id="nb-steps"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 0 1 21.75 8.25Z"/></svg>Pasos</button>
+  <button class="nb" onclick="showTab('stats')" id="nb-stats"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/></svg>Stats</button>
+  <button class="nb" onclick="showTab('pr')" id="nb-pr"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-3.044 0"/></svg>1RM</button>
+</nav>
+<div id="tmr-overlay" class="hidden">
+  <div id="tmr-wod-scroll">
+    <div id="tmr-wod-content" style="padding:12px 16px;"></div>
+  </div>
+  <div id="tmr-panel">
+    <div class="tmr-panel-top">
+      <div>
+        <div class="tmr-panel-ttl" id="tmr-ttl">Temporizador</div>
+        <div class="tmr-types" style="margin-top:6px;display:flex;gap:6px;">
+          <button class="ttype on" onclick="setTmrType('emom')">EMOM</button>
+          <button class="ttype" onclick="setTmrType('amrap')">AMRAP</button>
+          <button class="ttype" onclick="setTmrType('fortime')">For Time</button>
+        </div>
+      </div>
+      <button class="tmr-close" style="position:static;font-size:22px;color:var(--t2);background:none;border:none;cursor:pointer;padding:4px 8px;" onclick="closeTimer()">✕</button>
+    </div>
+    <div class="tmr-settings" id="tmr-settings"></div>
+    <div class="tmr-display-sm" id="tmr-display">00:00</div>
+    <div class="tmr-info-row">
+      <div class="tmr-round-sm" id="tmr-round">&nbsp;</div>
+      <div class="tmr-sub-sm" id="tmr-sub">&nbsp;</div>
+    </div>
+    <div class="tmr-ex-sm" id="tmr-ex">&nbsp;</div>
+    <div class="tmr-round-counter" id="tmr-lap-row" style="display:none;">
+      <div class="tmr-round-lbl">Vueltas completadas</div>
+      <div class="tmr-round-val" id="tmr-lap-count">0</div>
+      <button class="tmr-round-btn" onclick="tmrAddLap()">+ ROUND</button>
+    </div>
+    <div class="tmr-btns-sm">
+      <button class="tmr-main-sm tmr-start" id="tmr-main-btn" onclick="tmrStartStop()">INICIAR</button>
+      <button class="tmr-sec-sm" onclick="tmrReset()">Reset</button>
+    </div>
+  </div>
+</div>
+<div id="rec-overlay" class="hidden">
+  <div id="rec-sheet">
+    <button class="tmr-close" onclick="document.getElementById('rec-overlay').classList.add('hidden')">✕</button>
+    <div class="tmr-handle"></div>
+    <div class="tmr-ttl">¿Cómo te sentís hoy?</div>
+    <div style="font-size:13px;color:var(--t2);text-align:center;margin-bottom:14px;">Tu nivel de recuperación (0-100)<br>Tomá referencia de tu Whoop si tenés</div>
+    <div class="rec-val" id="rec-val">70</div>
+    <div class="rec-lbl" id="rec-lbl">Normal</div>
+    <input class="rec-slider" id="rec-slider" type="range" min="0" max="100" value="70" oninput="updateRecLbl(this.value)">
+    <div class="rec-prompt" style="font-size:12px;color:var(--t2);">Si tu recovery es bajo pero te sentís con energía, podés ignorar el ajuste sugerido y entrenar a tu carga normal.</div>
+    <div class="rec-actions">
+      <button class="rec-btn" onclick="saveRec(false)">Ignorar y entrenar normal</button>
+      <button class="rec-btn primary" onclick="saveRec(true)">Aplicar ajuste</button>
+    </div>
+  </div>
+</div>
+<div id="rest-overlay" class="hidden"><div id="rest-sheet"></div></div>
+<div id="plate-overlay" class="hidden"><div id="plate-sheet"></div></div>
+  
+  
+<script src="funnfit_data.js"></script>
+<script src="funnfit_app.js"></script>
+
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("service-worker.js").catch(function(e){console.log("SW:",e);});});}
+</script>
+</body>
+</html>
